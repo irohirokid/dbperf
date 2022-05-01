@@ -1,6 +1,7 @@
 package main
 
 import (
+	"bytes"
 	"context"
 	"fmt"
 	"os"
@@ -13,15 +14,18 @@ type AppSpanner struct {
 	client *spanner.Client
 }
 
-func (appSpanner AppSpanner) populate(numUsers int) error {
+func (appSpanner AppSpanner) populate(start int, end int) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 
 	_, err := appSpanner.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+		b := bytes.NewBufferString("INSERT Users (Id, Gold) VALUES ")
+		for i := start; i < end; i++ {
+			b.WriteString(fmt.Sprintf("(%d,10000),", i))
+		}
+		b.WriteString(fmt.Sprintf("(%d,10000)", end))
 		stmt := spanner.Statement{
-			SQL: `INSERT Users (Id, Gold) VALUES
-                                (1, 10000),
-                                (2, 10000)`,
+			SQL: b.String(),
 		}
 		rowCount, err := txn.Update(ctx, stmt)
 		if err != nil {
@@ -31,6 +35,24 @@ func (appSpanner AppSpanner) populate(numUsers int) error {
 		return err
 	})
 	return err
+}
+
+func (appSpanner AppSpanner) populateMany(numUsers int) error {
+	for startPos, endPos := 1, 0; endPos < numUsers; {
+		if endPos+50000 < numUsers {
+			endPos += 50000
+		} else {
+			endPos = numUsers
+		}
+
+		err := appSpanner.populate(startPos, endPos)
+		if err != nil {
+			return err
+		}
+
+		startPos = endPos + 1
+	}
+	return nil
 }
 
 func NewAppSpannerClient() (*AppSpanner, error) {
@@ -50,7 +72,7 @@ func main() {
 		fmt.Println(err)
 	}
 
-	err = appClient.populate(1)
+	err = appClient.populateMany(100000)
 	if err != nil {
 		fmt.Println(err)
 	}
