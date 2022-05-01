@@ -15,15 +15,28 @@ type AppSpanner struct {
 }
 
 func (appSpanner AppSpanner) populate(start int, end int) error {
+	err := appSpanner.populateTable(start, end, "Users (Id, Gold)", "(%d,10000)")
+	if err != nil {
+		return err
+	}
+
+	err = appSpanner.populateTable(start, end, "UserItems (Id, Amount)", "(%d,0)")
+	if err != nil {
+		return err
+	}
+	return nil
+}
+
+func (appSpanner AppSpanner) populateTable(start int, end int, columns string, rowTmpl string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 
 	_, err := appSpanner.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-		b := bytes.NewBufferString("INSERT Users (Id, Gold) VALUES ")
+		b := bytes.NewBufferString("INSERT " + columns + " VALUES ")
 		for i := start; i < end; i++ {
-			b.WriteString(fmt.Sprintf("(%d,10000),", i))
+			b.WriteString(fmt.Sprintf(rowTmpl+",", i))
 		}
-		b.WriteString(fmt.Sprintf("(%d,10000)", end))
+		b.WriteString(fmt.Sprintf(rowTmpl, end))
 		stmt := spanner.Statement{
 			SQL: b.String(),
 		}
@@ -31,7 +44,7 @@ func (appSpanner AppSpanner) populate(start int, end int) error {
 		if err != nil {
 			return err
 		}
-		fmt.Fprintf(os.Stdout, "%d record(s) inserted.\n", rowCount)
+		fmt.Fprintf(os.Stdout, "%s: %d record(s) inserted.\n", columns, rowCount)
 		return err
 	})
 	return err
