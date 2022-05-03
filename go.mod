@@ -1,4 +1,4 @@
-module example.com/go-spanner-example
+module github.com/irohiroki/spanner-performance-test
 
 go 1.18
 
