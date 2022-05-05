@@ -36,11 +36,13 @@ func main() {
 		return
 	}
 
-	if os.Args[1] == "populate" {
+	switch os.Args[1] {
+	case "populate":
 		err = appClient.populateMany(100000)
-		if err != nil {
-			fmt.Println(err)
-		}
-		return
+	case "perftest":
+		err = appClient.perfTest()
+	}
+	if err != nil {
+		fmt.Println(err)
 	}
 }
