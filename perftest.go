@@ -77,7 +77,7 @@ func (appSpanner AppSpanner) measureTransaction() (time.Duration, error) {
 
 	start := time.Now()
 	_, err := appSpanner.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-		userRow, err := txn.ReadRow(ctx, "Users", spanner.Key{1}, []string{"Gold"})
+		userRow, err := txn.ReadRow(ctx, "Users", spanner.Key{1}, []string{"Gold"}) // TODO disparse id
 		if err != nil {
 			return err
 		}
