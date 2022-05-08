@@ -30,7 +30,7 @@ func (s Stat) String() string {
 	return fmt.Sprintf("%s\t%d\t%.02f\t%.02f\t%.02f\t%.02f\t%.02f\t%d", s.elapsed.Round(time.Second).String(), s.err, s.avr, s.med, s.p95, s.p99, s.wst, s.remain)
 }
 
-func (appSpanner AppSpanner) perfTest() error {
+func perfTest(appDb AppDbClient) error {
 	statChan := make(chan Stat)
 	go statPrinter(statChan)
 
@@ -44,7 +44,7 @@ func (appSpanner AppSpanner) perfTest() error {
 	statTicker := make(chan time.Time)
 	termChan := make(chan any)
 	for i := 0; i < numLoaders; i++ {
-		go loader(appSpanner, start, reqChan, statTicker, statChan, termChan)
+		go loader(appDb, start, reqChan, statTicker, statChan, termChan)
 	}
 
 	reqTicker := time.Tick(time.Second)
@@ -71,7 +71,7 @@ func (appSpanner AppSpanner) perfTest() error {
 	return nil
 }
 
-func (appSpanner AppSpanner) measureTransaction() (time.Duration, error) {
+func (appSpanner AppSpanner) MeasureTransaction() (time.Duration, error) {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 
@@ -113,7 +113,7 @@ func (appSpanner AppSpanner) measureTransaction() (time.Duration, error) {
 	return time.Since(start), err
 }
 
-func loader(appSpanner AppSpanner, start time.Time, reqChan chan int8, statTicker <-chan time.Time, statChan chan Stat, termChan chan any) {
+func loader(appDb AppDbClient, start time.Time, reqChan chan int8, statTicker <-chan time.Time, statChan chan Stat, termChan chan any) {
 	statInterval, err := time.ParseDuration("1s")
 	if err != nil {
 		panic("Invalid duration")
@@ -128,7 +128,7 @@ Loop:
 			if reqCode == 0 {
 				break Loop
 			}
-			resTime, err := appSpanner.measureTransaction()
+			resTime, err := appDb.MeasureTransaction()
 			if err != nil {
 				fmt.Fprintf(os.Stderr, "measureTransaction: %v\n", err.Error())
 				numErr++

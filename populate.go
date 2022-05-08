@@ -23,7 +23,7 @@ func (appSpanner AppSpanner) populate(start int, end int) error {
 	return nil
 }
 
-func (appSpanner AppSpanner) populateMany(numUsers int) error {
+func (appSpanner AppSpanner) PopulateMany(numUsers int) error {
 	for startPos, endPos := 1, 0; endPos < numUsers; {
 		if endPos+50000 < numUsers {
 			endPos += 50000
