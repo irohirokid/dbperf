@@ -41,11 +41,11 @@ func (appSpanner AppSpanner) MeasureTransaction() (time.Duration, error) {
 			return err
 		}
 
-		txn.BufferWrite([]*spanner.Mutation{
+		err = txn.BufferWrite([]*spanner.Mutation{
 			spanner.Update("Users", []string{"Id", "Gold"}, []interface{}{1, gold - 5}),
 			spanner.Update("UserItems", []string{"Id", "Amount"}, []interface{}{1, amount + 1}),
 		})
-		return nil
+		return err
 	})
 	return time.Since(start), err
 }
