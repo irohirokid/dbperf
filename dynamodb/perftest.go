@@ -2,14 +2,15 @@ package dynamodb
 
 import (
 	"fmt"
-	"math/rand"
 	"time"
+
+	"github.com/irohiroki/spanner-performance-test/configs"
 )
 
 func (d AppDynamoDB) MeasureTransaction() (time.Duration, error) {
 	start := time.Now()
 	table := d.client.Table("Main")
-	userId := rand.Intn(10000/2) + rand.Intn(10000/2) + 1
+	userId := configs.RandUserId()
 	userKey := fmt.Sprintf("User%d", userId)
 	userItemKey := fmt.Sprintf("UserItem%d", userId)
 	update1 := table.Update("PK", userKey).Range("SK", userKey).Add("Gold", -5).If("$ >= ?", "Gold", 5)

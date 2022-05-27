@@ -5,6 +5,7 @@ import (
 	"os"
 
 	"github.com/irohiroki/spanner-performance-test/cloudspanner"
+	"github.com/irohiroki/spanner-performance-test/configs"
 	"github.com/irohiroki/spanner-performance-test/db"
 	dynamodb2 "github.com/irohiroki/spanner-performance-test/dynamodb"
 )
@@ -30,7 +31,7 @@ func main() {
 
 	switch os.Args[2] {
 	case "populate":
-		err = appDb.PopulateMany(100000)
+		err = appDb.PopulateMany(configs.NumUsers)
 	case "perftest":
 		err = perfTest(appDb)
 	}

@@ -6,6 +6,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/spanner"
+	"github.com/irohiroki/spanner-performance-test/configs"
 )
 
 func (appSpanner AppSpanner) MeasureTransaction() (time.Duration, error) {
@@ -14,7 +15,8 @@ func (appSpanner AppSpanner) MeasureTransaction() (time.Duration, error) {
 
 	start := time.Now()
 	_, err := appSpanner.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-		userRow, err := txn.ReadRow(ctx, "Users", spanner.Key{1}, []string{"Gold"}) // TODO disparse id
+		userId := configs.RandUserId()
+		userRow, err := txn.ReadRow(ctx, "Users", spanner.Key{userId}, []string{"Gold"})
 		if err != nil {
 			return err
 		}
@@ -30,7 +32,7 @@ func (appSpanner AppSpanner) MeasureTransaction() (time.Duration, error) {
 		}
 
 		var userItemRow *spanner.Row
-		userItemRow, err = txn.ReadRow(ctx, "UserItems", spanner.Key{1}, []string{"Amount"})
+		userItemRow, err = txn.ReadRow(ctx, "UserItems", spanner.Key{userId}, []string{"Amount"})
 		if err != nil {
 			return err
 		}
