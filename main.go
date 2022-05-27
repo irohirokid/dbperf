@@ -6,6 +6,7 @@ import (
 
 	"github.com/irohiroki/spanner-performance-test/cloudspanner"
 	"github.com/irohiroki/spanner-performance-test/db"
+	dynamodb2 "github.com/irohiroki/spanner-performance-test/dynamodb"
 )
 
 func main() {
@@ -19,6 +20,8 @@ func main() {
 	switch os.Args[1] {
 	case "spanner":
 		appDb, err = cloudspanner.NewClient(os.Args[3])
+	case "dynamodb":
+		appDb, err = dynamodb2.NewClient(os.Args[3])
 	}
 	if err != nil {
 		fmt.Println(err)

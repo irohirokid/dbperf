@@ -5,6 +5,13 @@ go 1.18
 require cloud.google.com/go/spanner v1.31.0
 
 require (
+	github.com/aws/aws-sdk-go v1.42.47
+	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
+	github.com/gofrs/uuid v4.2.0+incompatible // indirect
+	github.com/jmespath/go-jmespath v0.4.0 // indirect
+)
+
+require (
 	cloud.google.com/go v0.100.2 // indirect
 	cloud.google.com/go/compute v1.5.0 // indirect
 	github.com/census-instrumentation/opencensus-proto v0.3.0 // indirect
@@ -17,6 +24,7 @@ require (
 	github.com/golang/protobuf v1.5.2 // indirect
 	github.com/google/go-cmp v0.5.7 // indirect
 	github.com/googleapis/gax-go/v2 v2.2.0 // indirect
+	github.com/guregu/dynamo v1.15.1
 	github.com/montanaflynn/stats v0.6.6
 	go.opencensus.io v0.23.0 // indirect
 	golang.org/x/net v0.0.0-20220325170049-de3da57026de // indirect
