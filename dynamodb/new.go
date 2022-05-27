@@ -7,7 +7,7 @@ import (
 	"github.com/aws/aws-sdk-go/aws"
 	"github.com/aws/aws-sdk-go/aws/session"
 	"github.com/guregu/dynamo"
-	"github.com/irohiroki/spanner-performance-test/db"
+	"github.com/irohirokid/dbperf/db"
 )
 
 type AppDynamoDB struct {

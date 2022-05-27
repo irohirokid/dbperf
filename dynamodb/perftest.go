@@ -4,7 +4,7 @@ import (
 	"fmt"
 	"time"
 
-	"github.com/irohiroki/spanner-performance-test/configs"
+	"github.com/irohirokid/dbperf/configs"
 )
 
 func (d AppDynamoDB) MeasureTransaction() (time.Duration, error) {

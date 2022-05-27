@@ -5,8 +5,8 @@ import (
 	"os"
 	"time"
 
-	"github.com/irohiroki/spanner-performance-test/db"
-	"github.com/irohiroki/spanner-performance-test/result"
+	"github.com/irohirokid/dbperf/db"
+	"github.com/irohirokid/dbperf/result"
 	"github.com/montanaflynn/stats"
 )
 

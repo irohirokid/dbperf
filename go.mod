@@ -1,4 +1,4 @@
-module github.com/irohiroki/spanner-performance-test
+module github.com/irohirokid/dbperf
 
 go 1.18
 

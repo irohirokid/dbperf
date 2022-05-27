@@ -5,7 +5,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/spanner"
-	"github.com/irohiroki/spanner-performance-test/db"
+	"github.com/irohirokid/dbperf/db"
 )
 
 type AppSpanner struct {

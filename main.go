@@ -4,10 +4,10 @@ import (
 	"fmt"
 	"os"
 
-	"github.com/irohiroki/spanner-performance-test/cloudspanner"
-	"github.com/irohiroki/spanner-performance-test/configs"
-	"github.com/irohiroki/spanner-performance-test/db"
-	dynamodb2 "github.com/irohiroki/spanner-performance-test/dynamodb"
+	"github.com/irohirokid/dbperf/cloudspanner"
+	"github.com/irohirokid/dbperf/configs"
+	"github.com/irohirokid/dbperf/db"
+	dynamodb2 "github.com/irohirokid/dbperf/dynamodb"
 )
 
 func main() {

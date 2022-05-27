@@ -6,7 +6,7 @@ import (
 	"time"
 
 	"cloud.google.com/go/spanner"
-	"github.com/irohiroki/spanner-performance-test/configs"
+	"github.com/irohirokid/dbperf/configs"
 )
 
 func (appSpanner AppSpanner) MeasureTransaction() (time.Duration, error) {
