@@ -2,34 +2,39 @@ package main
 
 import (
 	"fmt"
-	"os"
 
 	"github.com/irohirokid/dbperf/cloudspanner"
 	"github.com/irohirokid/dbperf/configs"
 	"github.com/irohirokid/dbperf/db"
 	dynamodb2 "github.com/irohirokid/dbperf/dynamodb"
+	"gopkg.in/alecthomas/kingpin.v2"
+)
+
+var (
+	service          = kingpin.Flag("service", "`spanner` or `dynamodb`").Short('s').Required().String()
+	spannerId        = kingpin.Flag("spannerid", "DB identifier").Short('i').String()
+	dynamodbEndpoint = kingpin.Flag("endpoint", "Endpoint").Short('e').String()
 )
 
 func main() {
-	if len(os.Args) < 4 {
-		fmt.Println("Usage: dbperf <service_name> <subcommand> <db_id>")
-		return
-	}
+	kingpin.Command("populate", "Populate DB.")
+	kingpin.Command("perftest", "Run performance test.")
+	command := kingpin.Parse()
 
 	var appDb db.Client
 	var err error
-	switch os.Args[1] {
+	switch *service {
 	case "spanner":
-		appDb, err = cloudspanner.NewClient(os.Args[3])
+		appDb, err = cloudspanner.NewClient(*spannerId)
 	case "dynamodb":
-		appDb, err = dynamodb2.NewClient(os.Args[3])
+		appDb, err = dynamodb2.NewClient(*dynamodbEndpoint)
 	}
 	if err != nil {
 		fmt.Println(err)
 		return
 	}
 
-	switch os.Args[2] {
+	switch command {
 	case "populate":
 		err = appDb.PopulateMany(configs.NumUsers)
 	case "perftest":

@@ -5,6 +5,11 @@ go 1.18
 require cloud.google.com/go/spanner v1.31.0
 
 require (
+	github.com/alecthomas/template v0.0.0-20190718012654-fb15b899a751 // indirect
+	github.com/alecthomas/units v0.0.0-20211218093645-b94a6e3cc137 // indirect
+)
+
+require (
 	github.com/aws/aws-sdk-go v1.42.47
 	github.com/cenkalti/backoff/v4 v4.1.2 // indirect
 	github.com/gofrs/uuid v4.2.0+incompatible // indirect
@@ -37,4 +42,5 @@ require (
 	google.golang.org/genproto v0.0.0-20220324131243-acbaeb5b85eb // indirect
 	google.golang.org/grpc v1.45.0 // indirect
 	google.golang.org/protobuf v1.28.0 // indirect
+	gopkg.in/alecthomas/kingpin.v2 v2.2.6
 )
