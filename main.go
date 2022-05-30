@@ -14,6 +14,7 @@ var (
 	service          = kingpin.Flag("service", "`spanner` or `dynamodb`").Short('s').Required().String()
 	spannerId        = kingpin.Flag("spannerid", "DB identifier").Short('i').String()
 	dynamodbEndpoint = kingpin.Flag("endpoint", "Endpoint").Short('e').String()
+	duration         = kingpin.Flag("duration", "Performance test duration in second").Short('d').Default("10").Int()
 )
 
 func main() {

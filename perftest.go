@@ -12,7 +12,6 @@ import (
 
 var numLoaders = 3
 var reqPerSec = 100
-var testDurationSpec = "10s"
 
 func loader(appDb db.Client, start time.Time, reqChan chan int8, statTicker <-chan time.Time, statChan chan result.Stat, termChan chan any) {
 	statInterval, err := time.ParseDuration("1s")
@@ -87,10 +86,7 @@ func perfTest(appDb db.Client) error {
 	statChan := make(chan result.Stat)
 	go statPrinter(statChan)
 
-	testDuration, err := time.ParseDuration(testDurationSpec)
-	if err != nil {
-		return err
-	}
+	testDuration := time.Duration(*duration * int(time.Second))
 
 	start := time.Now()
 	reqChan := make(chan int8, reqPerSec*int(testDuration.Seconds()))
