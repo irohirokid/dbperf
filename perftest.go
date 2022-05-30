@@ -14,12 +14,7 @@ var numLoaders = 3
 var reqPerSec = 100
 
 func loader(appDb db.Client, start time.Time, reqChan chan int8, statTicker <-chan time.Time, statChan chan result.Stat, termChan chan any) {
-	statInterval, err := time.ParseDuration("1s")
-	if err != nil {
-		panic("Invalid duration")
-	}
-
-	resTimes := make(stats.Float64Data, reqPerSec*int(statInterval.Seconds()))
+	resTimes := make(stats.Float64Data, reqPerSec**interval)
 	numErr := 0
 Loop:
 	for {
@@ -103,8 +98,10 @@ func perfTest(appDb db.Client) error {
 		}
 
 		t := <-reqTicker
-		for i := 0; i < numLoaders; i++ {
-			statTicker <- t
+		if int(time.Since(start).Seconds())%*interval == 0 {
+			for i := 0; i < numLoaders; i++ {
+				statTicker <- t
+			}
 		}
 
 		if time.Since(start) > testDuration {

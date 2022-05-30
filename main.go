@@ -12,9 +12,10 @@ import (
 
 var (
 	service          = kingpin.Flag("service", "`spanner` or `dynamodb`").Short('s').Required().String()
-	spannerId        = kingpin.Flag("spannerid", "DB identifier").Short('i').String()
+	spannerId        = kingpin.Flag("spannerid", "DB identifier").Short('I').String()
 	dynamodbEndpoint = kingpin.Flag("endpoint", "Endpoint").Short('e').String()
 	duration         = kingpin.Flag("duration", "Performance test duration in second").Short('d').Default("10").Int()
+	interval         = kingpin.Flag("interval", "Stat interval in performance test").Short('i').Default("1").Int()
 )
 
 func main() {
