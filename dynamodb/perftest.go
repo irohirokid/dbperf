@@ -6,6 +6,11 @@ import (
 	"github.com/irohirokid/dbperf/configs"
 )
 
+func (d AppDynamoDB) SimpleRead() error {
+	// TODO
+	return nil
+}
+
 func (d AppDynamoDB) TransactWrite() error {
 	table := d.client.Table("Main")
 	userId := configs.RandUserId()

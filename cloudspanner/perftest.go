@@ -9,6 +9,21 @@ import (
 	"github.com/irohirokid/dbperf/configs"
 )
 
+func (appSpanner AppSpanner) SimpleRead() error {
+	ro := appSpanner.client.ReadOnlyTransaction().WithTimestampBound(spanner.ExactStaleness(15 * time.Second))
+	defer ro.Close()
+
+	ctx := context.Background()
+	row, err := ro.ReadRow(ctx, "Users", spanner.Key{configs.RandUserId()}, []string{"Gold"})
+	if err != nil {
+		return err
+	}
+
+	var gold int64
+	err = row.ColumnByName("Gold", &gold)
+	return err
+}
+
 func (appSpanner AppSpanner) TransactWrite() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()

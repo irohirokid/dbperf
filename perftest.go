@@ -29,7 +29,7 @@ Loop:
 			case "c":
 				break // TODO
 			case "r":
-				break // TODO
+				err = appDb.SimpleRead()
 			case "u":
 				break // TODO
 			case "cr":
