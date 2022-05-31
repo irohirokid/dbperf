@@ -66,6 +66,7 @@ Loop:
 
 			statChan <- result.Stat{
 				Elapsed: time.Since(start),
+				Count:   len(resTimes),
 				Err:     numErr,
 				Avr:     avr,
 				Med:     med,
