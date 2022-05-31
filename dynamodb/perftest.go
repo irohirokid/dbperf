@@ -2,13 +2,11 @@ package dynamodb
 
 import (
 	"fmt"
-	"time"
 
 	"github.com/irohirokid/dbperf/configs"
 )
 
-func (d AppDynamoDB) MeasureTransaction() (time.Duration, error) {
-	start := time.Now()
+func (d AppDynamoDB) TransactWrite() error {
 	table := d.client.Table("Main")
 	userId := configs.RandUserId()
 	userKey := fmt.Sprintf("User%d", userId)
@@ -17,5 +15,5 @@ func (d AppDynamoDB) MeasureTransaction() (time.Duration, error) {
 	update2 := table.Update("PK", userItemKey).Range("SK", userItemKey).Add("NumTickets", 1)
 
 	err := d.client.WriteTx().Update(update1).Update(update2).Run()
-	return time.Since(start), err
+	return err
 }

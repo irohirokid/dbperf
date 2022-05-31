@@ -9,11 +9,10 @@ import (
 	"github.com/irohirokid/dbperf/configs"
 )
 
-func (appSpanner AppSpanner) MeasureTransaction() (time.Duration, error) {
+func (appSpanner AppSpanner) TransactWrite() error {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 
-	start := time.Now()
 	_, err := appSpanner.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		userId := configs.RandUserId()
 		userRow, err := txn.ReadRow(ctx, "Users", spanner.Key{userId}, []string{"Gold"})
@@ -49,5 +48,5 @@ func (appSpanner AppSpanner) MeasureTransaction() (time.Duration, error) {
 		})
 		return err
 	})
-	return time.Since(start), err
+	return err
 }

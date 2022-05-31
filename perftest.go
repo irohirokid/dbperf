@@ -23,9 +23,11 @@ Loop:
 			if reqCode == 0 {
 				break Loop
 			}
-			resTime, err := appDb.MeasureTransaction()
+			start := time.Now()
+			err := appDb.TransactWrite()
+			resTime := time.Since(start)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "measureTransaction: %v\n", err.Error())
+				fmt.Fprintf(os.Stderr, "TransactWrite: %v\n", err.Error())
 				numErr++
 			}
 			resTimes = append(resTimes, float64(resTime.Microseconds())/1000)
