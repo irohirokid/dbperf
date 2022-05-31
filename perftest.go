@@ -23,11 +23,23 @@ Loop:
 			if reqCode == 0 {
 				break Loop
 			}
+			var err error
 			start := time.Now()
-			err := appDb.TransactWrite()
+			switch *operation {
+			case "c":
+				break // TODO
+			case "r":
+				break // TODO
+			case "u":
+				break // TODO
+			case "cr":
+				break // TODO
+			case "tw":
+				err = appDb.TransactWrite()
+			}
 			resTime := time.Since(start)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "TransactWrite: %v\n", err.Error())
+				fmt.Fprintf(os.Stderr, "On operation: %v\n", err.Error())
 				numErr++
 			}
 			resTimes = append(resTimes, float64(resTime.Microseconds())/1000)

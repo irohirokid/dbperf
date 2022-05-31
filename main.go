@@ -14,6 +14,7 @@ var (
 	service          = kingpin.Flag("service", "`spanner` or `dynamodb`").Short('s').Required().String()
 	spannerId        = kingpin.Flag("spannerid", "DB identifier").Short('I').String()
 	dynamodbEndpoint = kingpin.Flag("endpoint", "Endpoint").Short('e').String()
+	operation        = kingpin.Flag("operation", "Operation to perform on DB. One of c(Create), r(Read), u(Update), cr(ConsistentRead), or tw(TransactWrite)").Short('o').Default("r").String()
 	duration         = kingpin.Flag("duration", "Performance test duration in second").Short('d').Default("10").Int()
 	interval         = kingpin.Flag("interval", "Stat interval in performance test").Short('i').Default("1").Int()
 )
