@@ -14,7 +14,7 @@ var numLoaders = 3
 var reqPerSec = 100
 
 func loader(appDb db.Client, start time.Time, reqChan chan int8, statTicker <-chan time.Time, statChan chan result.Stat, termChan chan any) {
-	resTimes := make(stats.Float64Data, reqPerSec**interval)
+	resTimes := make(stats.Float64Data, 0, reqPerSec**interval)
 	numErr := 0
 Loop:
 	for {
