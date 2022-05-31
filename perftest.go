@@ -30,6 +30,11 @@ Loop:
 			}
 			resTimes = append(resTimes, float64(resTime.Microseconds())/1000)
 		case <-statTicker:
+			if len(reqChan) > reqPerSec {
+				fmt.Fprintln(os.Stderr, "*** Request overflow ***")
+				break Loop
+			}
+
 			if len(resTimes) == 0 {
 				break
 			}
@@ -87,34 +92,44 @@ func perfTest(appDb db.Client) error {
 	reqChan := make(chan int8, reqPerSec*int(testDuration.Seconds()))
 	statTicker := make(chan time.Time)
 	termChan := make(chan any)
+	numTerminated := 0
 	for i := 0; i < numLoaders; i++ {
 		go loader(appDb, start, reqChan, statTicker, statChan, termChan)
 	}
 
 	reqTicker := time.Tick(time.Second)
+	queueRequests(reqChan)
+Loop:
 	for {
-		for i := 0; i < reqPerSec; i++ {
-			reqChan <- 1
-		}
+		select {
+		case t := <-reqTicker:
+			if int(time.Since(start).Seconds())%*interval == 0 {
+				for i := 0; i < numLoaders; i++ {
+					statTicker <- t
+				}
+			}
 
-		t := <-reqTicker
-		if int(time.Since(start).Seconds())%*interval == 0 {
-			for i := 0; i < numLoaders; i++ {
-				statTicker <- t
+			if time.Since(start) > testDuration {
+				for i := 0; i < numLoaders; i++ {
+					reqChan <- 0
+				}
+			} else {
+				queueRequests(reqChan)
 			}
-		}
-
-		if time.Since(start) > testDuration {
-			for i := 0; i < numLoaders; i++ {
-				reqChan <- 0
+		case <-termChan:
+			numTerminated++
+			if numTerminated >= numLoaders {
+				break Loop
 			}
-			for i := 0; i < numLoaders; i++ {
-				<-termChan
-			}
-			break
 		}
 	}
 	return nil
+}
+
+func queueRequests(reqChan chan int8) {
+	for i := 0; i < reqPerSec; i++ {
+		reqChan <- 1
+	}
 }
 
 func statPrinter(statChan chan result.Stat) {
