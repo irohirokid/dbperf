@@ -10,7 +10,9 @@ import (
 	"github.com/montanaflynn/stats"
 )
 
-func loader(appDb db.Client, start time.Time, reqChan chan int8, statTicker <-chan time.Time, statChan chan result.Stat, termChan chan any) {
+type signal struct{}
+
+func loader(appDb db.Client, start time.Time, reqChan chan int8, statTicker <-chan time.Time, statChan chan result.Stat, termChan chan signal) {
 	resTimes := make(stats.Float64Data, 0, *reqPerSec**interval)
 	numErr := 0
 Loop:
@@ -91,7 +93,7 @@ Loop:
 			numErr = 0
 		}
 	}
-	termChan <- 1
+	termChan <- signal{}
 }
 
 func perfTest(appDb db.Client) error {
@@ -103,7 +105,7 @@ func perfTest(appDb db.Client) error {
 	start := time.Now()
 	reqChan := make(chan int8, *reqPerSec*int(testDuration.Seconds()))
 	statTicker := make(chan time.Time)
-	termChan := make(chan any)
+	termChan := make(chan signal)
 	numTerminated := 0
 	for i := 0; i < *numLoaders; i++ {
 		go loader(appDb, start, reqChan, statTicker, statChan, termChan)
