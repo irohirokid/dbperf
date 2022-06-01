@@ -3,12 +3,15 @@ package dynamodb
 import (
 	"fmt"
 
+	"github.com/guregu/dynamo"
 	"github.com/irohirokid/dbperf/configs"
 )
 
 func (d AppDynamoDB) SimpleRead() error {
-	// TODO
-	return nil
+	var user user
+	userKey := fmt.Sprintf("User%d", configs.RandUserId())
+	err := d.client.Table("Main").Get("PK", userKey).Range("SK", dynamo.Equal, userKey).One(&user)
+	return err
 }
 
 func (d AppDynamoDB) TransactWrite() error {
