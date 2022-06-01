@@ -7,6 +7,11 @@ import (
 	"github.com/irohirokid/dbperf/configs"
 )
 
+func (d AppDynamoDB) ConsistentRead() error {
+	// TODO
+	return nil
+}
+
 func (d AppDynamoDB) SimpleRead() error {
 	var user user
 	userKey := fmt.Sprintf("User%d", configs.RandUserId())

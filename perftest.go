@@ -33,7 +33,7 @@ Loop:
 			case "u":
 				break // TODO
 			case "cr":
-				break // TODO
+				err = appDb.ConsistentRead()
 			case "tw":
 				err = appDb.TransactWrite()
 			}
