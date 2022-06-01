@@ -10,11 +10,8 @@ import (
 	"github.com/montanaflynn/stats"
 )
 
-var numLoaders = 3
-var reqPerSec = 100
-
 func loader(appDb db.Client, start time.Time, reqChan chan int8, statTicker <-chan time.Time, statChan chan result.Stat, termChan chan any) {
-	resTimes := make(stats.Float64Data, 0, reqPerSec**interval)
+	resTimes := make(stats.Float64Data, 0, *reqPerSec**interval)
 	numErr := 0
 Loop:
 	for {
@@ -44,7 +41,7 @@ Loop:
 			}
 			resTimes = append(resTimes, float64(resTime.Microseconds())/1000)
 		case <-statTicker:
-			if len(reqChan) > reqPerSec {
+			if len(reqChan) > *reqPerSec {
 				fmt.Fprintln(os.Stderr, "*** Request overflow ***")
 				break Loop
 			}
@@ -104,11 +101,11 @@ func perfTest(appDb db.Client) error {
 	testDuration := time.Duration(*duration * int(time.Second))
 
 	start := time.Now()
-	reqChan := make(chan int8, reqPerSec*int(testDuration.Seconds()))
+	reqChan := make(chan int8, *reqPerSec*int(testDuration.Seconds()))
 	statTicker := make(chan time.Time)
 	termChan := make(chan any)
 	numTerminated := 0
-	for i := 0; i < numLoaders; i++ {
+	for i := 0; i < *numLoaders; i++ {
 		go loader(appDb, start, reqChan, statTicker, statChan, termChan)
 	}
 
@@ -119,13 +116,13 @@ Loop:
 		select {
 		case t := <-reqTicker:
 			if int(time.Since(start).Seconds())%*interval == 0 {
-				for i := 0; i < numLoaders; i++ {
+				for i := 0; i < *numLoaders; i++ {
 					statTicker <- t
 				}
 			}
 
 			if time.Since(start) > testDuration {
-				for i := 0; i < numLoaders; i++ {
+				for i := 0; i < *numLoaders; i++ {
 					reqChan <- 0
 				}
 			} else {
@@ -133,7 +130,7 @@ Loop:
 			}
 		case <-termChan:
 			numTerminated++
-			if numTerminated >= numLoaders {
+			if numTerminated >= *numLoaders {
 				break Loop
 			}
 		}
@@ -142,7 +139,7 @@ Loop:
 }
 
 func queueRequests(reqChan chan int8) {
-	for i := 0; i < reqPerSec; i++ {
+	for i := 0; i < *reqPerSec; i++ {
 		reqChan <- 1
 	}
 }

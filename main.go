@@ -17,6 +17,8 @@ var (
 	operation        = kingpin.Flag("operation", "Operation to perform on DB. One of c(Create), r(Read), u(Update), cr(ConsistentRead), or tw(TransactWrite)").Short('o').Default("r").String()
 	duration         = kingpin.Flag("duration", "Performance test duration in second").Short('d').Default("10").Int()
 	interval         = kingpin.Flag("interval", "Stat interval in performance test").Short('i').Default("1").Int()
+	numLoaders       = kingpin.Flag("loader", "Number of loader threads").Short('l').Default("3").Int()
+	reqPerSec        = kingpin.Flag("rps", "Requests per second").Short('r').Default("100").Int()
 )
 
 func main() {
