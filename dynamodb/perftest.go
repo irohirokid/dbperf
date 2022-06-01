@@ -8,8 +8,17 @@ import (
 )
 
 func (d AppDynamoDB) ConsistentRead() error {
-	// TODO
-	return nil
+	userKey := fmt.Sprintf("User%d", configs.RandUserId())
+
+	update := d.client.Table("Main").Update("PK", userKey).Range("SK", userKey).Add("Gold", 5)
+	err := d.client.WriteTx().Update(update).Run()
+	if err != nil {
+		return err
+	}
+
+	var user user
+	err = d.client.Table("Main").Get("PK", userKey).Range("SK", dynamo.Equal, userKey).Consistent(true).One(&user)
+	return err
 }
 
 func (d AppDynamoDB) SimpleRead() error {
