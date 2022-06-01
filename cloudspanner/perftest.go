@@ -10,13 +10,13 @@ import (
 	"github.com/irohirokid/dbperf/configs"
 )
 
-func (appSpanner AppSpanner) ConsistentRead() error {
+func (s AppSpanner) ConsistentRead() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
 	userId := configs.RandUserId()
 
-	_, err := appSpanner.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+	_, err := s.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{
 			SQL: fmt.Sprintf("UPDATE Users SET Gold = Gold + 5 WHERE Id = %d", userId),
 		}
@@ -27,7 +27,7 @@ func (appSpanner AppSpanner) ConsistentRead() error {
 		return err
 	}
 
-	row, err := appSpanner.client.Single().ReadRow(ctx, "Users", spanner.Key{userId}, []string{"Gold"})
+	row, err := s.client.Single().ReadRow(ctx, "Users", spanner.Key{userId}, []string{"Gold"})
 	if err != nil {
 		return err
 	}
@@ -37,8 +37,8 @@ func (appSpanner AppSpanner) ConsistentRead() error {
 	return err
 }
 
-func (appSpanner AppSpanner) SimpleRead() error {
-	ro := appSpanner.client.ReadOnlyTransaction().WithTimestampBound(spanner.ExactStaleness(15 * time.Second))
+func (s AppSpanner) SimpleRead() error {
+	ro := s.client.ReadOnlyTransaction().WithTimestampBound(spanner.ExactStaleness(15 * time.Second))
 	defer ro.Close()
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
@@ -53,11 +53,11 @@ func (appSpanner AppSpanner) SimpleRead() error {
 	return err
 }
 
-func (appSpanner AppSpanner) TransactWrite() error {
+func (s AppSpanner) TransactWrite() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second)
 	defer cancel()
 
-	_, err := appSpanner.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+	_, err := s.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		userId := configs.RandUserId()
 		userRow, err := txn.ReadRow(ctx, "Users", spanner.Key{userId}, []string{"Gold"})
 		if err != nil {

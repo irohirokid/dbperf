@@ -10,20 +10,20 @@ import (
 	"cloud.google.com/go/spanner"
 )
 
-func (appSpanner AppSpanner) populate(start int, end int) error {
-	err := appSpanner.populateTable(start, end, "Users (Id, Gold)", "(%d,10000)")
+func (s AppSpanner) populate(start int, end int) error {
+	err := s.populateTable(start, end, "Users (Id, Gold)", "(%d,10000)")
 	if err != nil {
 		return err
 	}
 
-	err = appSpanner.populateTable(start, end, "UserItems (Id, Amount)", "(%d,0)")
+	err = s.populateTable(start, end, "UserItems (Id, Amount)", "(%d,0)")
 	if err != nil {
 		return err
 	}
 	return nil
 }
 
-func (appSpanner AppSpanner) PopulateMany(numUsers int) error {
+func (s AppSpanner) PopulateMany(numUsers int) error {
 	for startPos, endPos := 1, 0; endPos < numUsers; {
 		if endPos+50000 < numUsers {
 			endPos += 50000
@@ -31,7 +31,7 @@ func (appSpanner AppSpanner) PopulateMany(numUsers int) error {
 			endPos = numUsers
 		}
 
-		err := appSpanner.populate(startPos, endPos)
+		err := s.populate(startPos, endPos)
 		if err != nil {
 			return err
 		}
@@ -41,11 +41,11 @@ func (appSpanner AppSpanner) PopulateMany(numUsers int) error {
 	return nil
 }
 
-func (appSpanner AppSpanner) populateTable(start int, end int, columns string, rowTmpl string) error {
+func (s AppSpanner) populateTable(start int, end int, columns string, rowTmpl string) error {
 	ctx, cancel := context.WithTimeout(context.Background(), 1*time.Minute)
 	defer cancel()
 
-	_, err := appSpanner.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
+	_, err := s.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		b := bytes.NewBufferString("INSERT " + columns + " VALUES ")
 		for i := start; i < end; i++ {
 			b.WriteString(fmt.Sprintf(rowTmpl+",", i))
