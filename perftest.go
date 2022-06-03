@@ -2,6 +2,7 @@ package main
 
 import (
 	"context"
+	"errors"
 	"fmt"
 	"os"
 	"time"
@@ -12,7 +13,7 @@ import (
 	"golang.org/x/sync/errgroup"
 )
 
-func loader(appDb db.Client, start time.Time, reqChan chan struct{}, statTicker <-chan time.Time, statChan chan result.Stat) {
+func loader(appDb db.Client, start time.Time, reqChan chan struct{}, statTicker <-chan time.Time, statChan chan result.Stat) error {
 	resTimes := make(stats.Float64Data, 0, *reqPerSec**interval)
 	numErr := 0
 Loop:
@@ -44,8 +45,7 @@ Loop:
 			resTimes = append(resTimes, float64(resTime.Microseconds())/1000)
 		case <-statTicker:
 			if len(reqChan) > *reqPerSec {
-				fmt.Fprintln(os.Stderr, "*** Request overflow ***")
-				break Loop
+				return errors.New("*** Request overflow ***")
 			}
 
 			if len(resTimes) == 0 {
@@ -54,27 +54,27 @@ Loop:
 
 			avr, err := resTimes.Mean()
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Mean: %v\n", err.Error())
+				return fmt.Errorf("mean: %s", err.Error())
 			}
 
 			med, err := resTimes.Median()
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Median: %v\n", err.Error())
+				return fmt.Errorf("median: %s", err.Error())
 			}
 
 			p95, err := stats.Percentile(resTimes, 95)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Percentile 95: %v\n", err.Error())
+				return fmt.Errorf("percentile 95: %s", err.Error())
 			}
 
 			p99, err := stats.Percentile(resTimes, 99)
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Percentile 99: %v\n", err.Error())
+				return fmt.Errorf("percentile 99: %s", err.Error())
 			}
 
 			wst, err := resTimes.Max()
 			if err != nil {
-				fmt.Fprintf(os.Stderr, "Max: %v\n", err.Error())
+				return fmt.Errorf("max: %s", err.Error())
 			}
 
 			statChan <- result.Stat{
@@ -93,6 +93,7 @@ Loop:
 			numErr = 0
 		}
 	}
+	return nil
 }
 
 func parentLoader(start time.Time, reqChan chan struct{}, statTicker chan time.Time) {
@@ -129,8 +130,7 @@ func perfTest(appDb db.Client) error {
 	eg, _ := errgroup.WithContext(context.Background())
 	for i := 0; i < *numLoaders; i++ {
 		eg.Go(func() error {
-			loader(appDb, start, reqChan, statTicker, statChan)
-			return nil
+			return loader(appDb, start, reqChan, statTicker, statChan)
 		})
 	}
 
