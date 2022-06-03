@@ -11,21 +11,15 @@ import (
 )
 
 type signal struct{}
-type reqCode int
 
-const (
-	terminate reqCode = iota
-	process
-)
-
-func loader(appDb db.Client, start time.Time, reqChan chan reqCode, statTicker <-chan time.Time, statChan chan result.Stat, termChan chan signal) {
+func loader(appDb db.Client, start time.Time, reqChan chan struct{}, statTicker <-chan time.Time, statChan chan result.Stat, termChan chan signal) {
 	resTimes := make(stats.Float64Data, 0, *reqPerSec**interval)
 	numErr := 0
 Loop:
 	for {
 		select {
-		case reqCode := <-reqChan:
-			if reqCode == terminate {
+		case _, ok := <-reqChan:
+			if !ok {
 				break Loop
 			}
 			var err error
@@ -109,7 +103,7 @@ func perfTest(appDb db.Client) error {
 	testDuration := time.Duration(*duration * int(time.Second))
 
 	start := time.Now()
-	reqChan := make(chan reqCode, *reqPerSec*int(testDuration.Seconds()))
+	reqChan := make(chan struct{}, *reqPerSec*int(testDuration.Seconds()))
 	statTicker := make(chan time.Time)
 	termChan := make(chan signal)
 	numTerminated := 0
@@ -130,9 +124,7 @@ Loop:
 			}
 
 			if time.Since(start) > testDuration {
-				for i := 0; i < *numLoaders; i++ {
-					reqChan <- 0
-				}
+				close(reqChan)
 			} else {
 				queueRequests(reqChan)
 			}
@@ -146,9 +138,9 @@ Loop:
 	return nil
 }
 
-func queueRequests(reqChan chan reqCode) {
+func queueRequests(reqChan chan struct{}) {
 	for i := 0; i < *reqPerSec; i++ {
-		reqChan <- process
+		reqChan <- struct{}{}
 	}
 }
 
