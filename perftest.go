@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"fmt"
 	"os"
 	"time"
@@ -8,11 +9,10 @@ import (
 	"github.com/irohirokid/dbperf/db"
 	"github.com/irohirokid/dbperf/result"
 	"github.com/montanaflynn/stats"
+	"golang.org/x/sync/errgroup"
 )
 
-type signal struct{}
-
-func loader(appDb db.Client, start time.Time, reqChan chan struct{}, statTicker <-chan time.Time, statChan chan result.Stat, termChan chan signal) {
+func loader(appDb db.Client, start time.Time, reqChan chan struct{}, statTicker <-chan time.Time, statChan chan result.Stat) {
 	resTimes := make(stats.Float64Data, 0, *reqPerSec**interval)
 	numErr := 0
 Loop:
@@ -93,24 +93,10 @@ Loop:
 			numErr = 0
 		}
 	}
-	termChan <- signal{}
 }
 
-func perfTest(appDb db.Client) error {
-	statChan := make(chan result.Stat)
-	go statPrinter(statChan)
-
+func parentLoader(start time.Time, reqChan chan struct{}, statTicker chan time.Time) {
 	testDuration := time.Duration(*duration * int(time.Second))
-
-	start := time.Now()
-	reqChan := make(chan struct{}, *reqPerSec*int(testDuration.Seconds()))
-	statTicker := make(chan time.Time)
-	termChan := make(chan signal)
-	numTerminated := 0
-	for i := 0; i < *numLoaders; i++ {
-		go loader(appDb, start, reqChan, statTicker, statChan, termChan)
-	}
-
 	reqTicker := time.Tick(time.Second)
 	queueRequests(reqChan)
 Loop:
@@ -125,17 +111,33 @@ Loop:
 
 			if time.Since(start) > testDuration {
 				close(reqChan)
+				break Loop
 			} else {
 				queueRequests(reqChan)
 			}
-		case <-termChan:
-			numTerminated++
-			if numTerminated >= *numLoaders {
-				break Loop
-			}
 		}
 	}
-	return nil
+}
+
+func perfTest(appDb db.Client) error {
+	statChan := make(chan result.Stat)
+	go statPrinter(statChan)
+
+	start := time.Now()
+	reqChan := make(chan struct{}, *reqPerSec**duration)
+	statTicker := make(chan time.Time)
+	eg, _ := errgroup.WithContext(context.Background())
+	for i := 0; i < *numLoaders; i++ {
+		eg.Go(func() error {
+			loader(appDb, start, reqChan, statTicker, statChan)
+			return nil
+		})
+	}
+
+	go parentLoader(start, reqChan, statTicker)
+
+	err := eg.Wait()
+	return err
 }
 
 func queueRequests(reqChan chan struct{}) {
