@@ -103,12 +103,8 @@ Loop:
 			}
 			_start := time.Now()
 			switch *operation {
-			case "c":
-				break // TODO
 			case "r":
 				err = appDb.SimpleRead()
-			case "u":
-				break // TODO
 			case "cr":
 				err = appDb.ConsistentRead()
 			case "tw":
