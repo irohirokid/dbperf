@@ -86,7 +86,7 @@ func loader(appDb db.Client, reqChan chan struct{}, statChan chan result.Stat) e
 		resTimes: make(stats.Float64Data, 0, *reqPerSec**interval),
 		numErr:   0,
 	}
-	statTicker := time.Tick(time.Second)
+	statTicker := time.Tick(time.Duration(*interval * int(time.Second)))
 Loop:
 	for {
 		select {
