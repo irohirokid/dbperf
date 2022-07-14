@@ -1,6 +1,8 @@
 package dynamodb
 
-import "fmt"
+import (
+	"fmt"
+)
 
 type user struct {
 	PK   string
@@ -8,17 +10,36 @@ type user struct {
 	Gold int
 }
 
-func (d AppDynamoDB) PopulateMany(numUsers int) error {
+func (d AppDynamoDB) populate(startIndex int, num int) error {
 	table := d.client.Table("Main")
-
-	for i := 1; i <= numUsers; i++ {
-		key := fmt.Sprintf("User%d", i)
-		item := user{
+	items := make([]interface{}, num)
+	for i := 0; i < num; i++ {
+		key := fmt.Sprintf("User%d", startIndex+i)
+		items[i] = user{
 			PK:   key,
 			SK:   key,
 			Gold: 10000,
 		}
-		err := table.Put(item).Run()
+	}
+
+	wrote, err := table.Batch().Write().Put(items...).Run()
+	if err != nil {
+		return err
+	}
+	if wrote != num {
+		return fmt.Errorf("incomplete Put: requested %d, wrote %d", num, wrote)
+	}
+	return nil
+}
+
+func (d AppDynamoDB) PopulateMany(numUsers int) error {
+	for i := 1; i <= numUsers; i += 25 {
+		var err error
+		if i+24 > numUsers {
+			err = d.populate(i, numUsers-i+1)
+		} else {
+			err = d.populate(i, 25)
+		}
 		if err != nil {
 			return err
 		}
