@@ -2,6 +2,8 @@ package dynamodb
 
 import (
 	"fmt"
+	"os"
+	"regexp"
 
 	"github.com/guregu/dynamo"
 	"github.com/irohirokid/dbperf/configs"
@@ -13,7 +15,16 @@ func (d AppDynamoDB) ConsistentRead() error {
 	update := d.client.Table("Main").Update("PK", userKey).Range("SK", userKey).Add("Gold", 5)
 	err := d.client.WriteTx().Update(update).Run()
 	if err != nil {
-		return err
+		matched, regexperr := regexp.MatchString("TransactionConflict", err.Error())
+		if regexperr != nil {
+			fmt.Fprintf(os.Stderr, "on MatchString: %v\n", regexperr)
+			return err
+		}
+		if matched {
+			// 他のgoroutineが更新中。エラーにしない
+		} else {
+			return err
+		}
 	}
 
 	var user user
@@ -37,5 +48,18 @@ func (d AppDynamoDB) TransactWrite() error {
 	update2 := table.Update("PK", userItemKey).Range("SK", userItemKey).Add("NumTickets", 1)
 
 	err := d.client.WriteTx().Update(update1).Update(update2).Run()
+	if err != nil {
+		matched, regexperr := regexp.MatchString("TransactionConflict", err.Error())
+		if regexperr != nil {
+			fmt.Fprintf(os.Stderr, "on MatchString: %v\n", regexperr)
+			return err
+		}
+		if matched {
+			// 他のgoroutineが更新中。エラーにしない
+			return nil
+		} else {
+			return err
+		}
+	}
 	return err
 }
