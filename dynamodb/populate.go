@@ -32,7 +32,7 @@ func (d AppDynamoDB) populate(startIndex int, num int) error {
 	return nil
 }
 
-func (d AppDynamoDB) PopulateMany(numUsers int) error {
+func (d AppDynamoDB) PopulateMany(numUsers int, populationBatchSize int) error {
 	for i := 1; i <= numUsers; i += 25 {
 		var err error
 		if i+24 > numUsers {

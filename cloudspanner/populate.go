@@ -23,10 +23,10 @@ func (s AppSpanner) populate(start int, end int) error {
 	return nil
 }
 
-func (s AppSpanner) PopulateMany(numUsers int) error {
+func (s AppSpanner) PopulateMany(numUsers int, populationBatchSize int) error {
 	for startPos, endPos := 1, 0; endPos < numUsers; {
-		if endPos+50000 < numUsers {
-			endPos += 50000
+		if endPos+populationBatchSize < numUsers {
+			endPos += populationBatchSize
 		} else {
 			endPos = numUsers
 		}
