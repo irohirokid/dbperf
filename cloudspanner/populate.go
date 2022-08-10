@@ -48,9 +48,9 @@ func (s AppSpanner) populateTable(start int, end int, columns string, rowTmpl st
 	_, err := s.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		b := bytes.NewBufferString("INSERT " + columns + " VALUES ")
 		for i := start; i < end; i++ {
-			b.WriteString(fmt.Sprintf(rowTmpl+",", i))
+			b.WriteString(fmt.Sprintf(rowTmpl+",", spannerKey(uint32(i))))
 		}
-		b.WriteString(fmt.Sprintf(rowTmpl, end))
+		b.WriteString(fmt.Sprintf(rowTmpl, spannerKey(uint32(end))))
 		stmt := spanner.Statement{
 			SQL: b.String(),
 		}

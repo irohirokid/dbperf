@@ -14,7 +14,7 @@ func (s AppSpanner) ConsistentRead() error {
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*99/10)
 	defer cancel()
 
-	userId := configs.RandUserId()
+	userId := spannerKey(configs.RandUserId())
 
 	_, err := s.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{
@@ -43,7 +43,7 @@ func (s AppSpanner) SimpleRead() error {
 
 	ctx, cancel := context.WithTimeout(context.Background(), time.Second*99/10)
 	defer cancel()
-	row, err := ro.ReadRow(ctx, "Users", spanner.Key{configs.RandUserId()}, []string{"Gold"})
+	row, err := ro.ReadRow(ctx, "Users", spanner.Key{spannerKey(configs.RandUserId())}, []string{"Gold"})
 	if err != nil {
 		return err
 	}
@@ -58,7 +58,7 @@ func (s AppSpanner) TransactWrite() error {
 	defer cancel()
 
 	_, err := s.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
-		userId := configs.RandUserId()
+		userId := spannerKey(configs.RandUserId())
 		userRow, err := txn.ReadRow(ctx, "Users", spanner.Key{userId}, []string{"Gold"})
 		if err != nil {
 			return err
