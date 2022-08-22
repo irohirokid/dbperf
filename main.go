@@ -20,7 +20,6 @@ var (
 	numLoaders          = kingpin.Flag("loader", "Number of loader threads").Short('l').Default("3").Int()
 	reqPerSec           = kingpin.Flag("rps", "Requests per second").Short('r').Default("100").Int()
 	populationBatchSize = kingpin.Flag("populationBatchSize", "Population batch size").Default("10000").Int()
-	connPoolSize        = kingpin.Flag("connPoolSize", "Connection Pool size").Default("100").Int()
 )
 
 func main() {
@@ -32,7 +31,7 @@ func main() {
 	var err error
 	switch *service {
 	case "spanner":
-		appDb, err = cloudspanner.NewClient(*spannerId, *connPoolSize)
+		appDb, err = cloudspanner.NewClient(*spannerId, *numLoaders)
 	case "dynamodb":
 		appDb, err = dynamodb2.NewClient(*dynamodbEndpoint)
 	}
