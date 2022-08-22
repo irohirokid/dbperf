@@ -87,8 +87,8 @@ func (s AppSpanner) TransactWrite() error {
 		}
 
 		err = txn.BufferWrite([]*spanner.Mutation{
-			spanner.Update("Users", []string{"Id", "Gold"}, []interface{}{1, gold - 5}),
-			spanner.Update("UserItems", []string{"Id", "Amount"}, []interface{}{1, amount + 1}),
+			spanner.Update("Users", []string{"Id", "Gold"}, []interface{}{int(userId), gold - 5}),
+			spanner.Update("UserItems", []string{"Id", "Amount"}, []interface{}{int(userId), amount + 1}),
 		})
 		return err
 	})
