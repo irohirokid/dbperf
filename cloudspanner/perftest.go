@@ -3,7 +3,6 @@ package cloudspanner
 import (
 	"context"
 	"errors"
-	"fmt"
 	"time"
 
 	"cloud.google.com/go/spanner"
@@ -18,7 +17,10 @@ func (s AppSpanner) ConsistentRead() error {
 
 	_, err := s.client.ReadWriteTransaction(ctx, func(ctx context.Context, txn *spanner.ReadWriteTransaction) error {
 		stmt := spanner.Statement{
-			SQL: fmt.Sprintf("UPDATE Users SET Gold = Gold + 5 WHERE Id = %d", userId),
+			SQL: "UPDATE Users SET Gold = Gold + 5 WHERE Id = @Id",
+			Params: map[string]interface{}{
+				"Id": int(userId),
+			},
 		}
 		_, err := txn.Update(ctx, stmt)
 		return err
